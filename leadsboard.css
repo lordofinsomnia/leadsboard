@@ -1,1 +1,9 @@
 /* CSS declarations go here */
+.selected
+{
+	background-color: olive;
+}
+.notSelected
+{
+	background-color: #888888; 
+}
