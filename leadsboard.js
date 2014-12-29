@@ -40,15 +40,40 @@ if(Meteor.isClient)
         
         PlayersList.update(selectedPlayer, {$inc: {score: 5}});
 
-        console.log(selectedPlayer);
+        var player = PlayersList.findOne(selectedPlayer);
+        var playerName = player.name;
+        console.log(playerName+' successfully incremented for 5 points');
       },
       'click .decrement': function()
       {
         var selectedPlayer = Session.get('selectedPlayer');
         
-        PlayersList.update(selectedPlayer, {$inc: {score: -5}});
+        PlayersList.update(selectedPlayer, {$inc: {score: -5}});       
+        var player = PlayersList.findOne(selectedPlayer);
+        var playerName = player.name;
+        console.log(playerName+' successfully decremented for 5 points');
+      },
+      'click .remove':function()
+      {
+        var selectedPlayer = Session.get('selectedPlayer');
+        PlayersList.remove(selectedPlayer);
+        var player = PlayersList.findOne(selectedPlayer);
+        var playerName = player.name;
+        console.log(playerName+' successfully deleted');
+      }
+    }
+  );
 
-        console.log(selectedPlayer);
+  Template.addPlayerForm.events
+  (
+    {
+      'submit form': function()
+      {
+        event.preventDefault();
+        var playerNameVar = event.target.playerName.value;
+        PlayersList.insert({ name : playerNameVar, 
+                             score: 0});
+        console.log(playerNameVar+' was successfully added');
       }
     }
   );
