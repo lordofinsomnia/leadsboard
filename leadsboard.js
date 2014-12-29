@@ -7,7 +7,10 @@ if(Meteor.isClient)
     {
       'player': function()
       {
-        return PlayersList.find({}, {sort: {score: -1, name: 1} });
+        var currentUserId = Meteor.userId();
+
+        return PlayersList.find({createdBy: currentUserId}, 
+                                {sort: {score: -1, name: 1} });
       },
       'selectedClass': function()
       {
@@ -71,8 +74,12 @@ if(Meteor.isClient)
       {
         event.preventDefault();
         var playerNameVar = event.target.playerName.value;
-        PlayersList.insert({ name : playerNameVar, 
-                             score: 0});
+        var currentUserId = Meteor.userId();
+        PlayersList.insert({ 
+                            name      : playerNameVar, 
+                            score     : 0,
+                            createdBy : currentUserId
+                          });
         console.log(playerNameVar+' was successfully added');
       }
     }
