@@ -2,6 +2,7 @@
     <title>Leaderboard</title>
 </head>
 <body>
+	{{> loginButtons}}
 	<h1>Leaderboard</h1>
 	{{> leaderboard}}
 	{{> addPlayerForm}}
@@ -19,13 +20,17 @@
 	{{/if}}
 	<input type="button" class="increment" value="Give 5 points">
 	<input type="button" class="decrement" value="Take 5 points">	
-	<input type="button" class="remove" value="Remove player">
+	{{#if currentUser}}		
+		<input type="button" class="remove" value="Remove player">
+	{{/if}}
 </template>
 
 <template name="addPlayerForm">
-	<form>
-		<input type="text" name="playerName">
-		<input type="submit" value="Add player">
-	</form>
+	{{#if currentUser}}
+		<form>		
+			<input type="text" name="playerName">
+			<input type="submit" value="Add player">
+		</form>
+	{{/if}}
 </template>
 
