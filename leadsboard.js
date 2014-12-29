@@ -2,15 +2,16 @@ PlayersList = new Mongo.Collection('players');
 
 if(Meteor.isClient)
 {
+  Meteor.subscribe('thePlayers');
+
   Template.leaderboard.helpers
   (
     {
       'player': function()
       {
-        var currentUserId = Meteor.userId();
+        //var currentUserId = Meteor.userId();
 
-        return PlayersList.find({createdBy: currentUserId}, 
-                                {sort: {score: -1, name: 1} });
+        return PlayersList.find({}, {sort: {score: -1, name: 1} });
       },
       'selectedClass': function()
       {
@@ -41,28 +42,31 @@ if(Meteor.isClient)
       {
         var selectedPlayer = Session.get('selectedPlayer');
         
-        PlayersList.update(selectedPlayer, {$inc: {score: 5}});
+        Meteor.call('modifyPlayerScore', selectedPlayer, 5);
 
         var player = PlayersList.findOne(selectedPlayer);
         var playerName = player.name;
         console.log(playerName+' successfully incremented for 5 points');
+        Meteor.call('sendLogMessage',playerName+' successfully incremented for 5 points');
       },
       'click .decrement': function()
       {
         var selectedPlayer = Session.get('selectedPlayer');
-        
-        PlayersList.update(selectedPlayer, {$inc: {score: -5}});       
+                
+        Meteor.call('modifyPlayerScore', selectedPlayer, -5);
         var player = PlayersList.findOne(selectedPlayer);
         var playerName = player.name;
         console.log(playerName+' successfully decremented for 5 points');
+        Meteor.call('sendLogMessage', playerName+' successfully decremented for 5 points');
       },
       'click .remove':function()
       {
         var selectedPlayer = Session.get('selectedPlayer');
-        PlayersList.remove(selectedPlayer);
+        Meteor.call('removePlayerData', selectedPlayer);        
         var player = PlayersList.findOne(selectedPlayer);
         var playerName = player.name;
         console.log(playerName+' successfully deleted');
+        Meteor.call('sendLogMessage', playerName+' successfully deleted');
       }
     }
   );
@@ -74,13 +78,10 @@ if(Meteor.isClient)
       {
         event.preventDefault();
         var playerNameVar = event.target.playerName.value;
-        var currentUserId = Meteor.userId();
-        PlayersList.insert({ 
-                            name      : playerNameVar, 
-                            score     : 0,
-                            createdBy : currentUserId
-                          });
+        
         console.log(playerNameVar+' was successfully added');
+        Meteor.call('insertPlayerData', playerNameVar);
+        Meteor.call('sendLogMessage', playerNameVar+' was successfully added');        
       }
     }
   );
@@ -89,6 +90,47 @@ if(Meteor.isClient)
 if(Meteor.isServer)
 {
   console.log("hello server");
+  console.log(PlayersList.find().fetch());
+
+  Meteor.publish
+  (
+    'thePlayers', function()
+    {
+      var currentUserId = this.userId;
+      return PlayersList.find({createdBy: currentUserId});
+    }
+  );
+
+  Meteor.methods
+  (
+    {
+      'sendLogMessage': function(log)
+      {
+        console.log(log);
+
+      },
+      'insertPlayerData': function(playerNameVar)
+      {
+        
+        var currentUserId = Meteor.userId();
+        PlayersList.insert({ 
+                            name      : playerNameVar, 
+                            score     : 0,
+                            createdBy : currentUserId
+                          });
+      },
+      'removePlayerData':function(selectedPlayer)
+      {
+        PlayersList.remove(selectedPlayer);
+      },
+      'modifyPlayerScore': function(selectedPlayer, value)
+      {
+        PlayersList.update(selectedPlayer, {$inc: {score: value}});
+      }
+    }
+  );
 }
+
+
 
 console.log("hello both");
